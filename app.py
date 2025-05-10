@@ -47,7 +47,7 @@ image_urls = {
 }
 
 # 狗狗圖片網址
-dog_url = "https://www.jvs.com.tw/upload/blog/images/20220318103214_49.jpg"
+dog_url = "https://img.shoplineapp.com/media/image_clips/62134cd7aea3ad002c617cf6/original.png?1645432022"
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
