@@ -36,39 +36,53 @@ jokes = [
     "我講一個笑裡藏刀的笑話，... 哈哈哈哈哈哈哈哈刀哈哈哈哈哈哈哈哈"
 ]
 
-# 帥哥圖片網址（這裡用狗狗圖做範例）
-image_url = "https://media.istockphoto.com/id/1482199015/zh/%E7%85%A7%E7%89%87/happy-puppy-welsh-corgi-14-weeks-old-dog-winking-panting-and-sitting-isolated-on-white.jpg?s=1024x1024&w=is&k=20&c=_ZtpdvyHh9-t2indnhX3sJiPZqc9VVB9Ql_AOxJ1FE4="
+# 帥哥圖片網址（dict，key僅內部辨識用）
+image_urls = {
+    "肖戰1": "https://img.shoplineapp.com/media/image_clips/620b69a4b62f160029421122/original.png?1644915107",
+    "肖戰2": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Xiao_Zhan_at_the_Weibo_Night_Ceremony_January_11_2020.jpg",
+    "肖戰3": "https://pgw.worldjournal.com/gw/photo.php?u=https://uc.udn.com.tw/photo/wj/realtime/2024/07/22/30084454.jpg&x=0&y=0&sw=0&sh=0&sl=W&fw=800&exp=3600&q=75&nt=1",
+    "林俊傑": "https://media.vogue.com.tw/photos/609de8f91029df917ac3094a/2:3/w_2240,c_limit/1080x1080-%E9%9F%B3%E6%A8%82%E5%9A%AE%E5%B0%8EJJ-%E9%96%8B%E8%BB%8A%E5%A5%BD%E5%BF%83%E6%83%85.png",
+    "林俊傑2": "https://cc.tvbs.com.tw/img/upload/2025/05/09/20250509155552-957cedfc.jpg",
+    "馬英九1": "https://images.plurk.com/d59ff28e446dcf746aa5dfd306680422.jpg"
+}
 
-# 只保留一個 handle_message，印出 user_id/群組ID 並回覆冷笑話、help、帥哥
+# 狗狗圖片網址
+dog_url = "https://www.jvs.com.tw/upload/blog/images/20220318103214_49.jpg"
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    print("來源ID：", event.source.user_id)      # 私人聊天室
-    print("群組ID：", getattr(event.source, "group_id", None))  # 群組
+    print("來源ID：", event.source.user_id)
+    print("群組ID：", getattr(event.source, "group_id", None))
 
-    if event.message.text == "/冷笑話":
-        joke = random.choice(jokes)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=joke)
-        )
-    elif event.message.text == "/help":
-        help_text = (
-            "功能選單：\n"
-            "/冷笑話 - 隨機獲得一則冷笑話\n"
-            "/帥哥 - 看一張帥哥圖\n"
-            "/help - 顯示本功能選單"
-        )
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=help_text)
-        )
-    elif event.message.text == "/帥哥":
-        line_bot_api.reply_message(
-            event.reply_token,
-            ImageSendMessage(
-                original_content_url=image_url,
-                preview_image_url=image_url
+    commands = {
+        "/help": lambda: TextSendMessage(
+            text=(
+                "功能選單：\n"
+                "=========================\n"
+                "冷笑話 - 隨機獲得一則冷笑話\n"
+                "帥哥 - 看一張帥哥圖\n"
+                "狗狗 - 看一張狗狗圖\n"
+                "/help - 顯示本功能選單\n"
             )
+        ),
+        "冷笑話": lambda: TextSendMessage(text=random.choice(jokes)),
+        "帥哥": lambda: (
+            lambda v: ImageSendMessage(
+                original_content_url=v,
+                preview_image_url=v
+            )
+        )(random.choice(list(image_urls.values()))),
+        "狗狗": lambda: ImageSendMessage(
+            original_content_url=dog_url,
+            preview_image_url=dog_url
+        ),
+    }
+
+    msg = event.message.text
+    if msg in commands:
+        line_bot_api.reply_message(
+            event.reply_token,
+            commands[msg]()
         )
 
 # 自動推播訊息（每1分鐘）
