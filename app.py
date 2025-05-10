@@ -35,14 +35,27 @@ jokes = [
     "我講一個笑裡藏刀的笑話，... 哈哈哈哈哈哈哈哈刀哈哈哈哈哈哈哈哈"
 ]
 
+# 只保留一個 handle_message，印出 user_id/群組ID 並回覆冷笑話
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     print("來源ID：", event.source.user_id)      # 私人聊天室
     print("群組ID：", getattr(event.source, "group_id", None))  # 群組
-    
+
+    if event.message.text == "冷笑話":
+        joke = random.choice(jokes)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=joke)
+        )
+    else:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text="請輸入「冷笑話」來聽冷笑話！")
+        )
+
 # 自動推播訊息（每1分鐘）
 def send_greeting():
-    user_id = "CHANNEL_ACCESS_TOKEN"  # 請填入你的 LINE User ID 或 Group ID
+    user_id = "<你的用戶ID或群組ID>"  # 請填入你剛剛印出來的 user_id 或群組ID
     try:
         line_bot_api.push_message(
             user_id,
@@ -67,21 +80,6 @@ def callback():
     except InvalidSignatureError:
         abort(400)
     return 'OK\n'
-
-# 處理訊息事件
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    if event.message.text == "冷笑話":
-        joke = random.choice(jokes)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=joke)
-        )
-    else:
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text="請輸入「冷笑話」來聽冷笑話！")
-        )
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
