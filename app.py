@@ -40,10 +40,10 @@ jokes = [
 image_urls = {
     #"肖戰1": "https://img.shoplineapp.com/media/image_clips/620b69a4b62f160029421122/original.png?1644915107",
     #"肖戰2": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Xiao_Zhan_at_the_Weibo_Night_Ceremony_January_11_2020.jpg",
-    "肖戰3": "https://pgw.worldjournal.com/gw/photo.php?u=https://uc.udn.com.tw/photo/wj/realtime/2024/07/22/30084454.jpg&x=0&y=0&sw=0&sh=0&sl=W&fw=800&exp=3600&q=75",
-    "林俊傑": "https://media.vogue.com.tw/photos/609de8f91029df917ac3094a/2:3/w_2240,c_limit/1080x1080-%E9%9F%B3%E6%A8%82%E5%9A%AE%E5%B0%8EJJ-%E9%96%8B%E8%BB%8A%E5%A5%BD%E5%BF%83%E6%83%85.png",
-    "林俊傑2": "https://cc.tvbs.com.tw/img/upload/2025/05/09/20250509155552-957cedfc.jpg",
-    "馬英九1": "https://images.plurk.com/d59ff28e446dcf746aa5dfd306680422.jpg"
+    "肖戰3": "https://pgw.worldjournal.com/gw/photo.php?u=https://uc.udn.com.tw/photo/wj/realtime/2024/07/22/30084454.jpg",
+    #"林俊傑": "https://media.vogue.com.tw/photos/609de8f91029df917ac3094a/2:3/w_2240,c_limit/1080x1080-%E9%9F%B3%E6%A8%82%E5%9A%AE%E5%B0%8EJJ-%E9%96%8B%E8%BB%8A%E5%A5%BD%E5%BF%83%E6%83%85.png",
+    #"林俊傑2": "https://cc.tvbs.com.tw/img/upload/2025/05/09/20250509155552-957cedfc.jpg",
+    #"馬英九1": "https://images.plurk.com/d59ff28e446dcf746aa5dfd306680422.jpg"
 }
 
 # 狗狗圖片網址
