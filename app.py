@@ -14,7 +14,7 @@ from linebot.exceptions import (
 )
 
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+    MessageEvent, TextMessage, TextSendMessage, ImageSendMessage,
 )
 
 # 讀取 Render Secret File
@@ -36,7 +36,10 @@ jokes = [
     "我講一個笑裡藏刀的笑話，... 哈哈哈哈哈哈哈哈刀哈哈哈哈哈哈哈哈"
 ]
 
-# 只保留一個 handle_message，印出 user_id/群組ID 並回覆冷笑話與 help
+# 帥哥圖片網址（這裡用狗狗圖做範例）
+image_url = "https://media.istockphoto.com/id/1482199015/zh/%E7%85%A7%E7%89%87/happy-puppy-welsh-corgi-14-weeks-old-dog-winking-panting-and-sitting-isolated-on-white.jpg?s=1024x1024&w=is&k=20&c=_ZtpdvyHh9-t2indnhX3sJiPZqc9VVB9Ql_AOxJ1FE4="
+
+# 只保留一個 handle_message，印出 user_id/群組ID 並回覆冷笑話、help、帥哥
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     print("來源ID：", event.source.user_id)      # 私人聊天室
@@ -52,11 +55,20 @@ def handle_message(event):
         help_text = (
             "功能選單：\n"
             "/冷笑話 - 隨機獲得一則冷笑話\n"
+            "/帥哥 - 看一張帥哥圖\n"
             "/help - 顯示本功能選單"
         )
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=help_text)
+        )
+    elif event.message.text == "/帥哥":
+        line_bot_api.reply_message(
+            event.reply_token,
+            ImageSendMessage(
+                original_content_url=image_url,
+                preview_image_url=image_url
+            )
         )
 
 # 自動推播訊息（每1分鐘）
