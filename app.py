@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+import os
 from flask import Flask, request, abort
 
 from linebot import (
@@ -12,8 +14,9 @@ from linebot.models import (
   MessageEvent, TextMessage, TextSendMessage,
 )
 
+load_dotenv()
 
- app = Flask(__name__)  
+app = Flask(__name__)  
 
 # 必須放上自己的Channel Access Token 
 line_bot_api = LineBotApi('Channel_Access_Token')  
@@ -21,20 +24,10 @@ line_bot_api = LineBotApi('Channel_Access_Token')
 # 必須放上自己的Channel Secret
 handler = WebhookHandler('Chennel_Secret')
 
-
 # 監聽所有來自 /callback 的 Post Request 
 @app.route("/callback", methods=['POST']) 
-def callback():     
-    # get X-Line-Signature header value     
-    signature = request.headers['X-Line-Signature']
-    # get request body as text     
-    body = request.get_data(as_text=True)     
-    app.logger.info("Request body: " + body)      
-    
-    # handle webhook body     
-    try:         
-        handler.handle(body, signature)     
-    except InvalidSignatureError:         
-        abort(400)      
+def callback():
+    return "123\n"
 
-    return 'OK'
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
