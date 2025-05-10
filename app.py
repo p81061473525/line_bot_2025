@@ -60,10 +60,10 @@ def send_greeting():
     except Exception as e:
         print("推播失敗：", e)
 
-# 啟動排程，每1分鐘執行一次
-scheduler = BackgroundScheduler()
-scheduler.add_job(send_greeting, 'interval', minutes=1)
-scheduler.start()
+# # 啟動排程，每1分鐘執行一次
+# scheduler = BackgroundScheduler()
+# scheduler.add_job(send_greeting, 'interval', minutes=1)
+# scheduler.start()
 
 # 監聽所有來自 /callback 的 Post Request
 @app.route("/callback", methods=['POST'])
