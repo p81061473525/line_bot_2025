@@ -36,7 +36,7 @@ jokes = [
     "我講一個笑裡藏刀的笑話，... 哈哈哈哈哈哈哈哈刀哈哈哈哈哈哈哈哈"
 ]
 
-# 只保留一個 handle_message，印出 user_id/群組ID 並回覆冷笑話
+# 只保留一個 handle_message，印出 user_id/群組ID 並回覆冷笑話與 help
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     print("來源ID：", event.source.user_id)      # 私人聊天室
@@ -47,6 +47,16 @@ def handle_message(event):
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=joke)
+        )
+    elif event.message.text == "/help":
+        help_text = (
+            "功能選單：\n"
+            "/冷笑話 - 隨機獲得一則冷笑話\n"
+            "/help - 顯示本功能選單"
+        )
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=help_text)
         )
 
 # 自動推播訊息（每1分鐘）
