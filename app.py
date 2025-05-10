@@ -14,7 +14,7 @@ from linebot.models import (
   MessageEvent, TextMessage, TextSendMessage,
 )
 
-load_dotenv('.env')
+load_dotenv('/etc/secrets/.env')
 
 app = Flask(__name__)  
 
