@@ -1,7 +1,6 @@
 flask==3.0.3
 numpy==1.23.2
 beautifulsoup4==4.6.3
-requests==2.20.1
 scipy
 pandas==1.2.4
 lxml==4.5.2
