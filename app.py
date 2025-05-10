@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+import random
 from flask import Flask, request, abort
 
 from linebot import (
@@ -22,6 +23,15 @@ app = Flask(__name__)
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))  
 handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 
+# 冷笑話庫
+jokes = [
+    "蛤蜊麵擺久了會變什麼？ 白酒蛤蜊麵",
+    "川普跌倒變甚麼？　三普",
+    "曹操字孟德 \n劉備字玄德 \n伍佰呢？ \n五百字心得",
+    "西醫治標\n中醫治本\n中西合璧\n治成標本",
+    "我講一個笑裡藏刀的笑話，... 哈哈哈哈哈哈哈哈刀哈哈哈哈哈哈哈哈"
+]
+
 # 監聽所有來自 /callback 的 Post Request 
 @app.route("/callback", methods=['POST']) 
 def callback():
@@ -37,7 +47,7 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     if event.message.text == "冷笑話":
-        joke = "有一天小明走在路上，突然跌倒，因為地球有引力。"
+        joke = random.choice(jokes)
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=joke)
