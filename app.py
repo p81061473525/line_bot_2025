@@ -35,6 +35,11 @@ jokes = [
     "我講一個笑裡藏刀的笑話，... 哈哈哈哈哈哈哈哈刀哈哈哈哈哈哈哈哈"
 ]
 
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    print("來源ID：", event.source.user_id)      # 私人聊天室
+    print("群組ID：", getattr(event.source, "group_id", None))  # 群組
+    
 # 自動推播訊息（每1分鐘）
 def send_greeting():
     user_id = "CHANNEL_ACCESS_TOKEN"  # 請填入你的 LINE User ID 或 Group ID
