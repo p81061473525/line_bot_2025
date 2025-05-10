@@ -25,6 +25,7 @@ app = Flask(__name__)
 # 從 .env 讀取金鑰
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
+group_id = os.getenv("GROUP_ID")
 
 # 冷笑話庫
 jokes = [
@@ -41,24 +42,18 @@ def handle_message(event):
     print("來源ID：", event.source.user_id)      # 私人聊天室
     print("群組ID：", getattr(event.source, "group_id", None))  # 群組
 
-    if event.message.text == "冷笑話":
+    if event.message.text == "/冷笑話":
         joke = random.choice(jokes)
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=joke)
         )
-    else:
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text="請輸入「冷笑話」來聽冷笑話！")
-        )
 
 # 自動推播訊息（每1分鐘）
 def send_greeting():
-    user_id = "<你的用戶ID或群組ID>"  # 請填入你剛剛印出來的 user_id 或群組ID
     try:
         line_bot_api.push_message(
-            user_id,
+            group_id,
             TextSendMessage(text="午安！（每1分鐘發送一次測試）")
         )
         print(f"{datetime.datetime.now()} 已推播午安訊息")
