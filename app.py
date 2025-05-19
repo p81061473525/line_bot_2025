@@ -146,5 +146,17 @@ def callback():
         abort(400)
     return 'OK\n'
 
+def notify_deploy_success():
+    try:
+        line_bot_api.push_message(
+            group_id,
+            TextSendMessage(text="部署成功 🎉")
+        )
+        print("已推播部署成功訊息到 LINE 群組")
+    except Exception as e:
+        print("推播部署成功訊息失敗：", e)
+
+# 在主程式啟動時自動通知
 if __name__ == "__main__":
+    notify_deploy_success()
     app.run(host="0.0.0.0", port=10000)
