@@ -53,8 +53,11 @@ dog_url = "https://img.shoplineapp.com/media/image_clips/62134cd7aea3ad002c617cf
 
 def fetch_youbike_data():
     url = "https://data.tycg.gov.tw/api/v1/rest/datastore/21bd0e7b-36af-4068-8e67-1d408b03457a?format=json"
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
     try:
-        response = requests.get(url, timeout=5)
+        response = requests.get(url, headers=headers, timeout=5)
         if response.status_code != 200:
             return f"查詢失敗：API 回傳狀態碼 {response.status_code}"
         try:
