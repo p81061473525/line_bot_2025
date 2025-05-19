@@ -99,6 +99,31 @@ def fetch_stock_price(stock_id):
     except Exception as e:
         return f"查詢股價失敗：{e}"
 
+def fetch_science_park_youbike():
+    """
+    查詢新竹科學園區 YouBike 站點資訊
+    """
+    url = "https://apis.youbike.com.tw/json/area-all.json"
+    try:
+        resp = requests.get(url, timeout=5)
+        data = resp.json()
+        result = ["新竹科學園區 YouBike 站點", "=" * 30]
+        found = False
+        for station in data:
+            if "科學園區" in station.get("sarea", ""):
+                found = True
+                result.append(f"站點名稱: {station['sna']}")
+                result.append(f"可借車數: {station['sbi']}")
+                result.append(f"可還車位: {station['bemp']}")
+                result.append(f"地址: {station['ar']}")
+                result.append(f"更新時間: {station['mday']}")
+                result.append('-' * 30)
+        if not found:
+            result.append("查無新竹科學園區站點")
+        return "\n".join(result)
+    except Exception as e:
+        return f"查詢失敗：{e}"
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     print("來源ID：", event.source.user_id)
@@ -129,6 +154,7 @@ def handle_message(event):
                 "帥哥 - 看一張帥哥圖\n"
                 "狗狗 - 看一張狗狗圖\n"
                 "ubike - 查詢桃園 YouBike 集福宮站\n"
+                "sciencepark - 查詢新竹科學園區 YouBike 站點\n"
                 "stock [代碼] - 查詢指定股票即時股價\n"
                 "/help - 顯示本功能選單\n"
             )
@@ -145,6 +171,7 @@ def handle_message(event):
             preview_image_url=dog_url
         ),
         "ubike": lambda: TextSendMessage(text=fetch_youbike_data()),
+        "sciencepark": lambda: TextSendMessage(text=fetch_science_park_youbike()),
     }
 
     if msg in commands:
