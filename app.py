@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 import random
+import requests
 from flask import Flask, request, abort
 from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
@@ -50,6 +51,29 @@ image_urls = {
 # 狗狗圖片網址
 dog_url = "https://img.shoplineapp.com/media/image_clips/62134cd7aea3ad002c617cf6/original.png?1645432022"
 
+def fetch_youbike_data():
+    url = "https://data.tycg.gov.tw/opendata/datalist/datasetMeta/download?id=d5df62b6-59f7-4108-9b1e-546b53d5d494&rid=21bd0e7b-36af-4068-8e67-1d408b03457a"
+    try:
+        response = requests.get(url, timeout=5)
+        data = response.json()
+
+        result = ["查詢關鍵字：集福宮", "=" * 30]
+        found = False
+        for station in data['retVal'].values():
+            if "集福宮" in station['sna']:
+                found = True
+                result.append(f"站點名稱: {station['sna']}")
+                result.append(f"站點類型: {'2.0E 電輔車' if '2.0E' in station['sna'] else '2.0 傳統車'}")
+                result.append(f"可借車數: {station['sbi']}")
+                result.append(f"可還車位: {station['bemp']}")
+                result.append(f"更新時間: {station['updateTime']}")
+                result.append('-' * 30)
+        if not found:
+            result.append("查無資料")
+        return "\n".join(result)
+    except Exception as e:
+        return f"查詢失敗：{e}"
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     print("來源ID：", event.source.user_id)
@@ -63,6 +87,7 @@ def handle_message(event):
                 "冷笑話 - 隨機獲得一則冷笑話\n"
                 "帥哥 - 看一張帥哥圖\n"
                 "狗狗 - 看一張狗狗圖\n"
+                "ubike - 查詢桃園 YouBike 集福宮站\n"
                 "/help - 顯示本功能選單\n"
             )
         ),
@@ -77,6 +102,7 @@ def handle_message(event):
             original_content_url=dog_url,
             preview_image_url=dog_url
         ),
+        "ubike": lambda: TextSendMessage(text=fetch_youbike_data()),
     }
 
     msg = event.message.text
