@@ -1,19 +1,17 @@
-from dotenv import load_dotenv
 import os
 import random
 import requests
+import datetime
+from dotenv import load_dotenv
 from flask import Flask, request, abort
 from apscheduler.schedulers.background import BackgroundScheduler
-import datetime
 
 from linebot import (
     LineBotApi, WebhookHandler
 )
-
 from linebot.exceptions import (
     InvalidSignatureError
 )
-
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage, ImageSendMessage,
 )
@@ -81,16 +79,23 @@ def fetch_youbike_data():
     except Exception as e:
         return f"查詢失敗：{e}"
 
-def fetch_stock_price():
+def fetch_stock_price(stock_id):
     """
-    取得台積電(2330)即時股價
+    取得指定股票即時股價（台灣證交所公開資料，延遲約20秒）
     """
-    url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=2330.TW"
+    url = f"https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_{stock_id}.tw"
     try:
         resp = requests.get(url, timeout=5)
         data = resp.json()
-        price = data["quoteResponse"]["result"][0]["regularMarketPrice"]
-        return f"台積電(2330) 即時股價：{price} 元"
+        if not data.get("msgArray"):
+            return f"查詢股價失敗：查無 {stock_id} 資料"
+        info = data["msgArray"][0]
+        name = info.get("n", stock_id)
+        price = info.get("z", "-")
+        time = info.get("t", "")
+        if price == "-":
+            return f"{name}({stock_id}) 暫無即時股價"
+        return f"{name}({stock_id}) 即時股價：{price} 元\n時間：{time}"
     except Exception as e:
         return f"查詢股價失敗：{e}"
 
@@ -98,6 +103,22 @@ def fetch_stock_price():
 def handle_message(event):
     print("來源ID：", event.source.user_id)
     print("群組ID：", getattr(event.source, "group_id", None))
+
+    msg = event.message.text.strip()
+    if msg.startswith("stock"):
+        parts = msg.split()
+        if len(parts) != 2:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text="請輸入股票代碼，例如：stock 2330")
+            )
+            return
+        stock_id = parts[1]
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=fetch_stock_price(stock_id))
+        )
+        return
 
     commands = {
         "/help": lambda: TextSendMessage(
@@ -108,7 +129,7 @@ def handle_message(event):
                 "帥哥 - 看一張帥哥圖\n"
                 "狗狗 - 看一張狗狗圖\n"
                 "ubike - 查詢桃園 YouBike 集福宮站\n"
-                "stock - 查詢台積電即時股價\n"
+                "stock [代碼] - 查詢指定股票即時股價\n"
                 "/help - 顯示本功能選單\n"
             )
         ),
@@ -124,10 +145,8 @@ def handle_message(event):
             preview_image_url=dog_url
         ),
         "ubike": lambda: TextSendMessage(text=fetch_youbike_data()),
-        "stock": lambda: TextSendMessage(text=fetch_stock_price()),
     }
 
-    msg = event.message.text
     if msg in commands:
         line_bot_api.reply_message(
             event.reply_token,
