@@ -81,6 +81,19 @@ def fetch_youbike_data():
     except Exception as e:
         return f"查詢失敗：{e}"
 
+def fetch_stock_price():
+    """
+    取得台積電(2330)即時股價
+    """
+    url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=2330.TW"
+    try:
+        resp = requests.get(url, timeout=5)
+        data = resp.json()
+        price = data["quoteResponse"]["result"][0]["regularMarketPrice"]
+        return f"台積電(2330) 即時股價：{price} 元"
+    except Exception as e:
+        return f"查詢股價失敗：{e}"
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     print("來源ID：", event.source.user_id)
@@ -95,6 +108,7 @@ def handle_message(event):
                 "帥哥 - 看一張帥哥圖\n"
                 "狗狗 - 看一張狗狗圖\n"
                 "ubike - 查詢桃園 YouBike 集福宮站\n"
+                "stock - 查詢台積電即時股價\n"
                 "/help - 顯示本功能選單\n"
             )
         ),
@@ -110,6 +124,7 @@ def handle_message(event):
             preview_image_url=dog_url
         ),
         "ubike": lambda: TextSendMessage(text=fetch_youbike_data()),
+        "stock": lambda: TextSendMessage(text=fetch_stock_price()),
     }
 
     msg = event.message.text
