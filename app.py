@@ -55,8 +55,12 @@ def fetch_youbike_data():
     url = "https://data.tycg.gov.tw/opendata/datalist/datasetMeta/download?id=d5df62b6-59f7-4108-9b1e-546b53d5d494&rid=21bd0e7b-36af-4068-8e67-1d408b03457a"
     try:
         response = requests.get(url, timeout=5)
-        data = response.json()
-
+        if response.status_code != 200:
+            return f"查詢失敗：API 回傳狀態碼 {response.status_code}"
+        try:
+            data = response.json()
+        except Exception as e:
+            return f"查詢失敗：無法解析資料 ({e})\n內容：{response.text[:200]}"
         result = ["查詢關鍵字：集福宮", "=" * 30]
         found = False
         for station in data['retVal'].values():
