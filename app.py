@@ -52,7 +52,7 @@ image_urls = {
 dog_url = "https://img.shoplineapp.com/media/image_clips/62134cd7aea3ad002c617cf6/original.png?1645432022"
 
 def fetch_youbike_data():
-    url = "https://data.tycg.gov.tw/opendata/datalist/datasetMeta/download?id=d5df62b6-59f7-4108-9b1e-546b53d5d494&rid=21bd0e7b-36af-4068-8e67-1d408b03457a"
+    url = "https://data.tycg.gov.tw/api/v1/rest/datastore/21bd0e7b-36af-4068-8e67-1d408b03457a?format=json"
     try:
         response = requests.get(url, timeout=5)
         if response.status_code != 200:
@@ -63,7 +63,7 @@ def fetch_youbike_data():
             return f"查詢失敗：無法解析資料 ({e})\n內容：{response.text[:200]}"
         result = ["查詢關鍵字：集福宮", "=" * 30]
         found = False
-        for station in data['retVal'].values():
+        for station in data['result']['records']:
             if "集福宮" in station['sna']:
                 found = True
                 result.append(f"站點名稱: {station['sna']}")
