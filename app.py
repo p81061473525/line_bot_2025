@@ -128,7 +128,7 @@ def fetch_science_park_youbike():
 
 def generate_love_story():
     """
-    產生連載戀愛小說，每次都接續前一篇內容
+    產生連載戀愛小說，每次都接續前一篇內容（新版 openai 寫法）
     """
     last_story = ""
     if os.path.exists("last_blog.txt"):
@@ -145,7 +145,8 @@ def generate_love_story():
         prompt = "請寫一篇 500 字的戀愛小說第一篇，內容要有情感起伏，結尾要有溫馨的感覺。"
 
     try:
-        response = openai.ChatCompletion.create(
+        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "你是一位小說作家。"},
@@ -194,6 +195,7 @@ def handle_message(event):
                 "ubike - 查詢桃園 YouBike 集福宮站\n"
                 "sciencepark - 查詢新竹科學園區 YouBike 站點\n"
                 "stock [代碼] - 查詢指定股票即時股價\n"
+                "blog - 產生一篇戀愛小說\n"
                 "/help - 顯示本功能選單\n"
             )
         ),
