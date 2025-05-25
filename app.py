@@ -5,6 +5,7 @@ import datetime
 from dotenv import load_dotenv
 from flask import Flask, request, abort
 from apscheduler.schedulers.background import BackgroundScheduler
+import openai
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -25,6 +26,7 @@ app = Flask(__name__)
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 group_id = os.getenv("GROUP_ID")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 冷笑話庫
 jokes = [
@@ -124,6 +126,42 @@ def fetch_science_park_youbike():
     except Exception as e:
         return f"查詢失敗：{e}"
 
+def generate_love_story():
+    """
+    產生連載戀愛小說，每次都接續前一篇內容
+    """
+    last_story = ""
+    if os.path.exists("last_blog.txt"):
+        with open("last_blog.txt", "r", encoding="utf-8") as f:
+            last_story = f.read().strip()
+
+    if last_story:
+        prompt = (
+            "這是一篇戀愛小說的連載，請根據前一篇內容繼續寫下去，"
+            "每篇約500字，內容要有情感起伏，結尾要有溫馨的感覺。\n\n"
+            f"前一篇內容：\n{last_story}\n\n請寫下一篇："
+        )
+    else:
+        prompt = "請寫一篇 500 字的戀愛小說第一篇，內容要有情感起伏，結尾要有溫馨的感覺。"
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "你是一位小說作家。"},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=1000,
+            temperature=0.9,
+        )
+        story = response.choices[0].message.content.strip()
+        # 寫入檔案，供下次連載用
+        with open("last_blog.txt", "w", encoding="utf-8") as f:
+            f.write(story)
+        return story
+    except Exception as e:
+        return f"產生小說失敗：{e}"
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     print("來源ID：", event.source.user_id)
@@ -172,6 +210,7 @@ def handle_message(event):
         ),
         "ubike": lambda: TextSendMessage(text=fetch_youbike_data()),
         "sciencepark": lambda: TextSendMessage(text=fetch_science_park_youbike()),
+        "blog": lambda: TextSendMessage(text=generate_love_story()),
     }
 
     if msg in commands:
@@ -191,10 +230,26 @@ def send_greeting():
     except Exception as e:
         print("推播失敗：", e)
 
+def send_daily_blog():
+    try:
+        story = generate_love_story()
+        line_bot_api.push_message(
+            group_id,
+            TextSendMessage(text=story)
+        )
+        print(f"{datetime.datetime.now()} 已推播今日戀愛小說")
+    except Exception as e:
+        print("推播小說失敗：", e)
+
 # # 啟動排程，每1分鐘執行一次
 # scheduler = BackgroundScheduler()
 # scheduler.add_job(send_greeting, 'interval', minutes=1)
 # scheduler.start()
+
+# 啟動排程（每天早上 9 點）
+scheduler = BackgroundScheduler()
+scheduler.add_job(send_daily_blog, 'cron', hour=9, minute=0)
+scheduler.start()
 
 # 監聽所有來自 /callback 的 Post Request
 @app.route("/callback", methods=['POST'])
