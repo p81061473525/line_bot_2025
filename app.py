@@ -128,7 +128,7 @@ def fetch_science_park_youbike():
 
 def generate_love_story():
     """
-    產生連載戀愛小說，每次都接續前一篇內容（新版 openai 寫法）
+    產生連載戀愛小說，每次都接續前一篇內容（新版 openai 寫法，使用 gpt-4.1-nano）
     """
     last_story = ""
     if os.path.exists("last_blog.txt"):
@@ -147,7 +147,7 @@ def generate_love_story():
     try:
         client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4.1-nano",
             messages=[
                 {"role": "system", "content": "你是一位小說作家。"},
                 {"role": "user", "content": prompt}
@@ -163,12 +163,31 @@ def generate_love_story():
     except Exception as e:
         return f"產生小說失敗：{e}"
 
+# 新增 blog 功能開關
+blog_enabled = False
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    global blog_enabled
     print("來源ID：", event.source.user_id)
     print("群組ID：", getattr(event.source, "group_id", None))
 
     msg = event.message.text.strip()
+    if msg == "1":
+        blog_enabled = True
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text="blog 功能已開啟")
+        )
+        return
+    elif msg == "0":
+        blog_enabled = False
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text="blog 功能已關閉")
+        )
+        return
+
     if msg.startswith("stock"):
         parts = msg.split()
         if len(parts) != 2:
@@ -212,7 +231,9 @@ def handle_message(event):
         ),
         "ubike": lambda: TextSendMessage(text=fetch_youbike_data()),
         "sciencepark": lambda: TextSendMessage(text=fetch_science_park_youbike()),
-        "blog": lambda: TextSendMessage(text=generate_love_story()),
+        "blog": lambda: TextSendMessage(
+            text=generate_love_story() if blog_enabled else "blog 功能目前未開啟"
+        ),
     }
 
     if msg in commands:
